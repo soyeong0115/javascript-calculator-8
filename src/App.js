@@ -7,7 +7,7 @@ class App {
   async run() {
     const input = await Input.getInput();
 
-    if (!input) {
+    if (!input || input.trim() === "") {
       return Output.printResult(0);
     }
 
