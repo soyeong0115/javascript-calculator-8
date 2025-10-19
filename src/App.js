@@ -18,7 +18,7 @@ class App {
 
     } catch (error) {
       console.error(error.message);
-      return 0; // 종료
+      throw error;
     }
   }
 }
