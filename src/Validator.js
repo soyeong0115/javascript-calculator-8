@@ -1,53 +1,55 @@
 class Validator {
     static validate(input) {
-        // 문자열 맨 앞이 // ? → 커스텀 분기로 보내기
         if (input.startsWith('//')) {
             return this.handleCustomDelimiter(input);
         }
 
         const defaultDelimiter = [',', ':']; // 기본 구분자
+        
         this.validateDefaultFormat(input, defaultDelimiter);
 
-        return { input, defaultDelimiter };
+        return { testInput: input, testDelimiter: defaultDelimiter };
     }
 
-    // 커스텀 분기 (커스텀 구분자 오류 확인)
+    // 커스텀 구분자 오류
     static handleCustomDelimiter(input) {
-        const customDelimiterPattern = /^\/\/([^0-9])\n/;
+        const customDelimiterPattern = /^\/\/([^0-9])\\n/;
         const match = input.match(customDelimiterPattern);
 
         if (!match) {
-            // 에러 : 커스텀 구분자 오류 (잘못된 커스텀 구분자 정의)
+            throw new Error('[ERROR] 커스텀 구분자 정의가 잘못되었습니다.')
         }
 
-        const customDelimiter = match[1]; // 커스텀 구분자
+        const customDelimiter = [match[1]]; // 커스텀 구분자
         const inputWithoutCustomDelimiter = input.slice(match[0].length);
 
         this.validateDefaultFormat(inputWithoutCustomDelimiter, customDelimiter);
         
-        return { inputWithoutCustomDelimiter, customDelimiter };
+        return { testInput: inputWithoutCustomDelimiter, testDelimiter: customDelimiter };
     }
 
+    // 문자열 형식 오류
     static validateDefaultFormat(input, delimiter) {
         if (!/^\d/.test(input) || !/\d$/.test(input)) {
-            // 에러 : 잘못된 입력 형식 오류
+            throw new Error('[ERROR] 문자열 입력 형식이 잘못되었습니다.')
         }
 
         const invalidChar = new RegExp(`[^0-9${delimiter.join('')}]`);
-        
+
         if (invalidChar.test(input)) {
-            // 에러 : 조합 오류
+            throw new Error('[ERROR] 구분자, 양수 이외의 문자가 사용되었습니다.')
         }
 
-        // 구분자 반복 검사
         this.validateRepeatedDelimiter(input, delimiter);
     }
 
     // 구분자의 반복 오류
     static validateRepeatedDelimiter(input, delimiter) {
-        const part = input.split(delimiter);
-        if (part.some(num => num === '')) {
-            // 에러 : 구분자 반복 오류
+        const regex = new RegExp(`[${delimiter.join('')}]`);
+        const parts = input.split(regex);
+
+        if (parts.some(part => part === '')) {
+            throw new Error('[ERROR] 구분자는 반복해서 사용할 수 없습니다.')
         }
     }
 
